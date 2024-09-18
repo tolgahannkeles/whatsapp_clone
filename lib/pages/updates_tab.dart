@@ -65,7 +65,7 @@ class _FriendsTabState extends State<FriendsTab> {
               child: const Text("Add"),
             )
           : null,
-      subtitle: Text(friend.friendshipStatus?.name ?? "null"),
+      subtitle: Text(friend.friendshipStatus.name),
     );
   }
 

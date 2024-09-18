@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:whatsapp_clone/models/conversation.dart';
-import 'package:whatsapp_clone/models/friend.dart';
 import 'package:whatsapp_clone/pages/chat_screen.dart';
 import 'package:whatsapp_clone/pages/create_chat_screen.dart';
 import 'package:whatsapp_clone/pages/login_page.dart';

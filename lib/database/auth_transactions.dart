@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:http/http.dart' as http;
 import 'package:whatsapp_clone/database/shared_preferences_util.dart';
-import 'package:whatsapp_clone/database/user_transactions.dart';
 import 'package:whatsapp_clone/models/auth_response.dart';
 
 class AuthService {

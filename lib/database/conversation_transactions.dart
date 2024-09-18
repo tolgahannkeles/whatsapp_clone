@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
 
-import 'package:uuid/uuid.dart';
 import 'package:whatsapp_clone/database/shared_preferences_util.dart';
 import 'package:whatsapp_clone/models/conversation.dart';
 import 'package:http/http.dart' as http;
@@ -97,8 +95,8 @@ class ConversationTransactions {
     if (uri == null) {
       throw Exception("Invalid URI");
     }
-    var response =
-        await http.post(uri, body: jsonEncode(newMessage.toJson()), headers: {
+
+    await http.post(uri, body: jsonEncode(newMessage.toJson()), headers: {
       'Content-Type': 'application/json',
       'Authorization': token,
     });

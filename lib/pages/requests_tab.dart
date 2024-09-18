@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 import 'package:whatsapp_clone/database/user_transactions.dart';
-import 'package:whatsapp_clone/models/friend.dart';
 import 'package:whatsapp_clone/models/friendship_response.dart';
 
 class RequestsTab extends StatefulWidget {
@@ -29,9 +27,7 @@ class _RequestsTabState extends State<RequestsTab> {
     UserTransactions.getFriendRequests().then(
       (value) {
         setState(() {
-          if (value != null) {
-            friendRequests = value;
-          }
+          friendRequests = value;
         });
       },
     );

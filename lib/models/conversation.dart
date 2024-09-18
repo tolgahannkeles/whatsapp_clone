@@ -1,4 +1,3 @@
-import 'package:uuid/uuid.dart';
 import 'package:whatsapp_clone/models/message.dart';
 
 class Conversation {

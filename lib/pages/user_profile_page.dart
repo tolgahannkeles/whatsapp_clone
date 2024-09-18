@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp_clone/database/user_transactions.dart';
 import 'package:whatsapp_clone/models/user.dart';

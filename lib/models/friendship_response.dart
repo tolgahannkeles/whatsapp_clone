@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:whatsapp_clone/models/enum_friendship_status.dart';
 
 class FriendshipResponse {

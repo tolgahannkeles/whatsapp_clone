@@ -6,7 +6,6 @@ import 'package:whatsapp_clone/database/user_transactions.dart';
 import 'package:whatsapp_clone/main.dart';
 import 'package:whatsapp_clone/models/conversation.dart';
 import 'package:whatsapp_clone/models/message.dart';
-import 'package:whatsapp_clone/models/user.dart';
 import 'package:whatsapp_clone/pages/profile_screen.dart';
 
 class ChatScreen extends StatefulWidget {

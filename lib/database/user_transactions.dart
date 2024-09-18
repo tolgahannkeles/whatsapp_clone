@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
 
-import 'package:uuid/uuid.dart';
 import 'package:whatsapp_clone/database/shared_preferences_util.dart';
 import 'package:whatsapp_clone/models/friend.dart';
 import 'package:http/http.dart' as http;

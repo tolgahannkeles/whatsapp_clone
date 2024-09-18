@@ -50,7 +50,7 @@ class _CreateChatScreenState extends State<CreateChatScreen> {
         ),
       ),
       title: Text(friend.username),
-      subtitle: Text(friend.friendshipStatus?.name ?? "null"),
+      subtitle: Text(friend.friendshipStatus.name),
       onTap: () {
         _showGroupNameDialog(friend);
       },

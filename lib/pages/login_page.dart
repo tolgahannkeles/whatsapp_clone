@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:whatsapp_clone/database/auth_transactions.dart';
-import 'package:whatsapp_clone/database/shared_preferences_util.dart';
 import 'package:whatsapp_clone/main.dart';
-import 'package:whatsapp_clone/models/auth_response.dart';
 import 'package:whatsapp_clone/pages/main_screen.dart';
 import 'package:whatsapp_clone/pages/register_page.dart';
 import 'package:whatsapp_clone/utils/constants.dart';

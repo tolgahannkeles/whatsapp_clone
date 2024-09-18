@@ -1,5 +1,3 @@
-import 'dart:developer';
-import 'package:uuid/uuid.dart';
 import 'package:whatsapp_clone/models/enum_friendship_status.dart';
 
 class Friend {
