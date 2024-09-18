@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:whatsapp_clone/models/conversation.dart';
+import 'package:whatsapp_clone/models/friend.dart';
+import 'package:whatsapp_clone/pages/chat_screen.dart';
+import 'package:whatsapp_clone/pages/create_chat_screen.dart';
+import 'package:whatsapp_clone/pages/login_page.dart';
 import 'package:whatsapp_clone/pages/main_screen.dart';
+import 'package:whatsapp_clone/pages/profile_screen.dart';
+import 'package:whatsapp_clone/pages/register_page.dart';
+import 'package:whatsapp_clone/pages/settings_page.dart';
+import 'package:whatsapp_clone/pages/splash_screen.dart';
+import 'package:whatsapp_clone/pages/user_profile_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,13 +25,35 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: darkBlue,
         appBarTheme: const AppBarTheme(backgroundColor: lightBlue),
       ),
-      home: const MainScreen(),
+      routes: {
+        LoginPage.routeName: (context) => const LoginPage(),
+        RegisterPage.routeName: (context) => const RegisterPage(),
+        MainScreen.routeName: (context) => const MainScreen(),
+        SettingsPage.routeName: (context) => const SettingsPage(),
+        CreateChatScreen.routeName: (context) => const CreateChatScreen(),
+        SplashScreen.routeName: (context) => const SplashScreen(),
+        UserProfilePage.routeName: (context) => const UserProfilePage(),
+        WhatsappProfilePage.routeName: (context) => const WhatsappProfilePage(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == ChatScreen.routeName) {
+          final args = settings.arguments as Conversation;
+          return MaterialPageRoute(
+            builder: (context) {
+              return ChatScreen(
+                conversation: args,
+              );
+            },
+          );
+        }
+        return null;
+      },
+      home: const SplashScreen(),
     );
   }
 }

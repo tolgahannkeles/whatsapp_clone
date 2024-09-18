@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:whatsapp_clone/main.dart';
 
 class WhatsappProfilePage extends StatelessWidget {
+  static const routeName = "/friendProfile";
+  static const String label = "Friend Profile";
+
   const WhatsappProfilePage({Key? key}) : super(key: key);
 
   @override
@@ -39,7 +42,8 @@ class WhatsappAppbar extends SliverPersistentHeaderDelegate {
   }
   static final appBarColorTween = ColorTween(begin: darkBlue, end: lightBlue);
 
-  static final appbarIconColorTween = ColorTween(begin: Colors.white, end: Colors.white);
+  static final appbarIconColorTween =
+      ColorTween(begin: Colors.white, end: Colors.white);
 
   static final phoneNumberTranslateTween = Tween<double>(begin: 20.0, end: 0.0);
 
@@ -48,7 +52,8 @@ class WhatsappAppbar extends SliverPersistentHeaderDelegate {
   static final profileImageRadiusTween = Tween<double>(begin: 3.5, end: 1.0);
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     final relativeScroll = min(shrinkOffset, 45) / 45;
     final relativeScroll70px = min(shrinkOffset, 70) / 70;
 
@@ -77,7 +82,9 @@ class WhatsappAppbar extends SliverPersistentHeaderDelegate {
                 ),
               ),
               Positioned(
-                  top: 15, left: 90, child: displayPhoneNumber(relativeScroll70px)),
+                  top: 15,
+                  left: 90,
+                  child: displayPhoneNumber(relativeScroll70px)),
               Positioned(
                   top: 5,
                   left: profilePicTranslateTween!.transform(relativeScroll70px),
@@ -108,13 +115,14 @@ class WhatsappAppbar extends SliverPersistentHeaderDelegate {
         transform: Matrix4.identity()
           ..translate(
             0.0,
-            phoneNumberTranslateTween.transform((relativeFullScrollOffset - 0.8) * 5),
+            phoneNumberTranslateTween
+                .transform((relativeFullScrollOffset - 0.8) * 5),
           ),
         child: Text(
           "+3 3333333333",
           style: TextStyle(
-            fontSize:
-                phoneNumberFontSizeTween.transform((relativeFullScrollOffset - 0.8) * 5),
+            fontSize: phoneNumberFontSizeTween
+                .transform((relativeFullScrollOffset - 0.8) * 5),
             color: Colors.white,
             fontWeight: FontWeight.w500,
           ),

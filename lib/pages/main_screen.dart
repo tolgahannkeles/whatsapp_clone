@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:whatsapp_clone/main.dart';
-import 'package:whatsapp_clone/pages/calls_tab.dart';
+import 'package:whatsapp_clone/pages/requests_tab.dart';
 import 'package:whatsapp_clone/pages/chat_tab.dart';
 import 'package:whatsapp_clone/pages/updates_tab.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+  static const routeName = "/main";
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -26,38 +27,32 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
         appBar: AppBar(
           title: const Text("WhatsApp"),
-          actions: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.camera_alt_outlined)),
-            IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
-            IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert_outlined)),
-          ],
+          actions: getActions(),
         ),
         body: PageView(
           onPageChanged: (value) => _updateCurrentIndex(value),
           controller: _pageController,
           children: const [
             ChatTab(),
-            UpdatesTab(),
-            CallsTab(),
+            FriendsTab(),
+            RequestsTab(),
           ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          child: const Icon(Icons.message_rounded),
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10))),
         ),
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: lightBlue,
           items: const [
             BottomNavigationBarItem(
-                icon: Icon(Icons.chat), label: "Chats", backgroundColor: darkBlue),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.update_rounded),
-                label: "Updates",
+                icon: ChatTab.icon,
+                label: ChatTab.label,
                 backgroundColor: darkBlue),
             BottomNavigationBarItem(
-                icon: Icon(Icons.call), label: "Calls", backgroundColor: darkBlue),
+                icon: FriendsTab.icon,
+                label: FriendsTab.label,
+                backgroundColor: darkBlue),
+            BottomNavigationBarItem(
+                icon: RequestsTab.icon,
+                label: RequestsTab.label,
+                backgroundColor: darkBlue),
           ],
           type: BottomNavigationBarType.shifting,
           selectedItemColor: darkGreen,
@@ -69,5 +64,18 @@ class _MainScreenState extends State<MainScreen> {
             });
           },
         ));
+  }
+
+  List<Widget> getActions() {
+    switch (_currentIndex) {
+      case 0:
+        return const ChatTab().actions;
+      case 1:
+        return const FriendsTab().actions;
+      case 2:
+        return const RequestsTab().actions;
+      default:
+        return [];
+    }
   }
 }

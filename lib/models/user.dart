@@ -1,22 +1,24 @@
+import 'package:uuid/uuid.dart';
+
 class User {
-  late String _name;
-  late String _surname;
-  late String _imageLink;
-  User({required String name, required String surname, required String imageLink}) {
-    this._name = name;
-    this._surname = surname;
-    this._imageLink = imageLink;
-  }
+  String id;
+  String username;
+  List<String> email;
+  String? profilePicture;
+  User({
+    required this.id,
+    required this.username,
+    required this.email,
+  });
 
-  String get name {
-    return _name;
-  }
+  factory User.fromJson(Map<String, dynamic> json) {
+    List<dynamic> emailJson = json["email"];
+    List<String> emails = emailJson.cast<String>();
 
-  String get imageLink {
-    return _imageLink;
-  }
-
-  String get surname {
-    return _surname;
+    return User(
+      id: json["id"],
+      username: json["username"],
+      email: emails,
+    );
   }
 }

@@ -1,23 +1,51 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:whatsapp_clone/dummies/dummy_messages.dart';
+import 'package:whatsapp_clone/database/conversation_transactions.dart';
+import 'package:whatsapp_clone/database/user_transactions.dart';
 import 'package:whatsapp_clone/main.dart';
+import 'package:whatsapp_clone/models/conversation.dart';
 import 'package:whatsapp_clone/models/message.dart';
 import 'package:whatsapp_clone/models/user.dart';
 import 'package:whatsapp_clone/pages/profile_screen.dart';
 
 class ChatScreen extends StatefulWidget {
-  late User receiver;
-  ChatScreen({super.key, required this.receiver});
+  static const String routeName = "/chat_screen";
+  final Conversation conversation;
+
+  const ChatScreen({super.key, required this.conversation});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  String localUser = "me";
   final TextEditingController _textEditingController = TextEditingController();
   final ScrollController _messageController = ScrollController();
-  List<Message> dummyMessage = DummyMessage.getDummies();
+  List<Message> messages = [];
+  String username = "-";
+
+  @override
+  void initState() {
+    UserTransactions.getLocalUser().then(
+      (value) {
+        if (value != null) {
+          username = value.username;
+
+          ConversationTransactions.getMessages(widget.conversation).then(
+            (value) {
+              setState(() {
+                messages = value;
+                inspect(messages);
+              });
+            },
+          );
+        }
+      },
+    );
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +55,11 @@ class _ChatScreenState extends State<ChatScreen> {
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
               builder: (context) {
-                // return ProfileScreen(user: widget.receiver);
-                return WhatsappProfilePage();
+                return const WhatsappProfilePage(); // Profil sayfasına yönlendirme
               },
             ));
           },
-          child: Text(widget.receiver.name),
+          child: Text(widget.conversation.title),
         ),
         leadingWidth: MediaQuery.of(context).size.width * .2,
         leading: InkWell(
@@ -42,7 +69,12 @@ class _ChatScreenState extends State<ChatScreen> {
           child: Row(
             children: [
               const Icon(Icons.arrow_back),
-              CircleAvatar(backgroundImage: NetworkImage(widget.receiver.imageLink)),
+              CircleAvatar(
+                backgroundImage: NetworkImage(
+                  widget.conversation.profilePictureUrl ??
+                      "https://www.shutterstock.com/image-vector/vector-flat-illustration-grayscale-avatar-600nw-2264922221.jpg",
+                ),
+              ),
             ],
           ),
         ),
@@ -54,63 +86,83 @@ class _ChatScreenState extends State<ChatScreen> {
             Expanded(
               child: ListView.builder(
                 controller: _messageController,
-                itemCount: dummyMessage.length,
+                itemCount: messages.length,
                 itemBuilder: (context, index) {
-                  if (dummyMessage[index].sender == localUser) {
-                    return sendedMessageItem(dummyMessage[index].message);
-                  } else {
-                    return receivedMessageItem(dummyMessage[index].message);
-                  }
+                  return messages[index].sender == username
+                      ? _sendedMessageItem(messages[index].message)
+                      : _receivedMessageItem(messages[index].message);
                 },
               ),
             ),
-            MessageBox(textEditingController: _textEditingController),
+            MessageBox(
+              textEditingController: _textEditingController,
+              onSend: _sendMessage,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget receivedMessageItem(String message) {
+  Widget _receivedMessageItem(String message) {
     return Padding(
-      padding:
-          EdgeInsets.only(bottom: 10, right: MediaQuery.of(context).size.width * .25),
+      padding: EdgeInsets.only(
+          bottom: 10, right: MediaQuery.of(context).size.width * .25),
       child: Container(
+        padding: const EdgeInsets.all(8),
         color: darkGreen,
-        height: 30,
         child: Text(message),
       ),
     );
   }
 
-  Widget sendedMessageItem(String message) {
+  Widget _sendedMessageItem(String message) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 10, left: MediaQuery.of(context).size.width * .25),
+      padding: EdgeInsets.only(
+          bottom: 10, left: MediaQuery.of(context).size.width * .25),
       child: Container(
+        padding: const EdgeInsets.all(8),
         color: darkGreen,
-        height: 30,
         child: Text(message),
       ),
     );
   }
 
-  void _sendMessage(String message) {
-    Message new_message =
-        Message(sender: "me", message: message, dateTime: DateTime.now());
-    _messageController.jumpTo(_messageController.position.maxScrollExtent);
-    setState(() {
-      dummyMessage.add(new_message);
+  Future<void> _sendMessage(String message) async {
+    if (message.trim().isEmpty) return;
+
+    Message newMessage = Message(
+      sender: username,
+      message: message,
+    );
+
+    // Scroll to the bottom
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _messageController.jumpTo(_messageController.position.maxScrollExtent);
     });
+
+    _textEditingController.clear();
+
+    // Backend'e mesaj gönderme işlemi
+    ConversationTransactions.sendMessage(widget.conversation, newMessage).then(
+      (value) {
+        setState(() {
+          messages.add(newMessage);
+        });
+      },
+    );
   }
 }
 
 class MessageBox extends StatefulWidget {
   const MessageBox({
     super.key,
-    required TextEditingController textEditingController,
-  }) : _textEditingController = textEditingController;
+    required this.textEditingController,
+    required this.onSend,
+  });
 
-  final TextEditingController _textEditingController;
+  final TextEditingController textEditingController;
+  final Function(String) onSend;
 
   @override
   State<MessageBox> createState() => _MessageBoxState();
@@ -132,11 +184,8 @@ class _MessageBoxState extends State<MessageBox> {
                   _isFocused = true;
                 });
               },
-              keyboardType: TextInputType.text,
-              textAlignVertical: TextAlignVertical.center,
-              cursorColor: darkGreen,
-              controller: widget._textEditingController,
-              style: const TextStyle(height: 1.5), // Adjust the height value as needed
+              controller: widget.textEditingController,
+              style: const TextStyle(height: 1.5),
               decoration: InputDecoration(
                 filled: true,
                 fillColor: lightBlue,
@@ -146,16 +195,18 @@ class _MessageBoxState extends State<MessageBox> {
                   icon: const Icon(Icons.emoji_emotions_rounded),
                   onPressed: () {},
                 ),
-                prefixIconColor: Colors.white,
-                suffixIcon: Row(mainAxisSize: MainAxisSize.min, children: [
-                  IconButton(onPressed: () {}, icon: Icon(Icons.attach_file_rounded)),
-                  IconButton(onPressed: () {}, icon: Icon(Icons.camera_alt))
-                ]),
-                suffixIconColor: Colors.white,
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                        onPressed: () {},
+                        icon: const Icon(Icons.attach_file_rounded)),
+                    IconButton(
+                        onPressed: () {}, icon: const Icon(Icons.camera_alt)),
+                  ],
+                ),
                 border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(20),
-                  ),
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -163,30 +214,23 @@ class _MessageBoxState extends State<MessageBox> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(right: 5.0, left: 5),
-          child: Center(
-            child: Ink(
-              decoration: const ShapeDecoration(
-                color: darkGreen,
-                shape: CircleBorder(),
-              ),
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                icon: Icon(_isFocused ? Icons.mic : Icons.send),
-                color: Colors.white,
-                onPressed: () {},
-              ),
+          padding: const EdgeInsets.symmetric(horizontal: 5.0),
+          child: Ink(
+            decoration: const ShapeDecoration(
+              color: darkGreen,
+              shape: CircleBorder(),
+            ),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: Icon(_isFocused ? Icons.send : Icons.mic),
+              color: Colors.white,
+              onPressed: () {
+                widget.onSend(widget.textEditingController.text);
+              },
             ),
           ),
         ),
       ],
     );
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    _isFocused = false;
   }
 }
