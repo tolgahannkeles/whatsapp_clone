@@ -1,12 +1,13 @@
-import 'dart:developer';
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:stomp_dart_client/stomp_dart_client.dart';
 import 'package:whatsapp_clone/database/conversation_transactions.dart';
 import 'package:whatsapp_clone/database/user_transactions.dart';
 import 'package:whatsapp_clone/main.dart';
 import 'package:whatsapp_clone/models/conversation.dart';
 import 'package:whatsapp_clone/models/message.dart';
 import 'package:whatsapp_clone/pages/profile_screen.dart';
+import 'package:whatsapp_clone/web-socket/stomp_service.dart';
 
 class ChatScreen extends StatefulWidget {
   static const String routeName = "/chat_screen";
@@ -21,29 +22,80 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _textEditingController = TextEditingController();
   final ScrollController _messageController = ScrollController();
+  final StompService _stompService = StompService();
   List<Message> messages = [];
   String username = "-";
 
   @override
   void initState() {
-    UserTransactions.getLocalUser().then(
-      (value) {
-        if (value != null) {
-          username = value.username;
+    super.initState();
 
-          ConversationTransactions.getMessages(widget.conversation).then(
-            (value) {
-              setState(() {
-                messages = value;
-                inspect(messages);
-              });
-            },
-          );
-        }
+    UserTransactions.getLocalUser().then((value) {
+      if (value != null) {
+        username = value.username;
+
+        ConversationTransactions.getMessages(widget.conversation).then((value) {
+          setState(() {
+            messages = value;
+          });
+        });
+
+        _connectToWebSocket();
+      }
+    });
+  }
+
+  void _connectToWebSocket() {
+    _stompService.connect(
+      onConnectCallback: (StompFrame frame) {
+        print('Connected to WebSocket');
+
+        _stompService.subscribeToConversation(
+          widget.conversation.id.toString(),
+          _onMessageReceived,
+        );
       },
     );
+  }
 
-    super.initState();
+  void _onMessageReceived(StompFrame frame) {
+    Map<String, dynamic> messageData = jsonDecode(frame.body!);
+
+    setState(() {
+      messages.add(Message(
+        sender: messageData['sender']['username'],
+        message: messageData['message'],
+      ));
+    });
+
+    _scrollToBottom();
+  }
+
+  void _sendMessage(String message) {
+    if (_stompService.stompClient.connected) {
+      // Only send the message if the connection is established
+      print(message);
+      Message newMessage = Message(sender: username, message: message);
+      _stompService.sendMessage(
+        '/api/messages/chat.sendMessage/${widget.conversation.id}',
+        newMessage,
+      );
+    } else {
+      print('Unable to send message: WebSocket connection is not established.');
+    }
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _messageController.jumpTo(_messageController.position.maxScrollExtent);
+    });
+  }
+
+  @override
+  void dispose() {
+    _stompService.disconnect();
+    _textEditingController.dispose();
+    super.dispose();
   }
 
   @override
@@ -54,7 +106,7 @@ class _ChatScreenState extends State<ChatScreen> {
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
               builder: (context) {
-                return const WhatsappProfilePage(); // Profil sayfasına yönlendirme
+                return const WhatsappProfilePage();
               },
             ));
           },
@@ -124,31 +176,6 @@ class _ChatScreenState extends State<ChatScreen> {
         color: darkGreen,
         child: Text(message),
       ),
-    );
-  }
-
-  Future<void> _sendMessage(String message) async {
-    if (message.trim().isEmpty) return;
-
-    Message newMessage = Message(
-      sender: username,
-      message: message,
-    );
-
-    // Scroll to the bottom
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _messageController.jumpTo(_messageController.position.maxScrollExtent);
-    });
-
-    _textEditingController.clear();
-
-    // Backend'e mesaj gönderme işlemi
-    ConversationTransactions.sendMessage(widget.conversation, newMessage).then(
-      (value) {
-        setState(() {
-          messages.add(newMessage);
-        });
-      },
     );
   }
 }

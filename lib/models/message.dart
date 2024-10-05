@@ -1,19 +1,19 @@
 class Message {
   String sender;
   String message;
-  DateTime dateTime;
+  DateTime date;
 
   Message({
     required this.sender,
     required this.message,
-    DateTime? dateTime,
-  }) : dateTime = dateTime ?? DateTime.now();
+    DateTime? date,
+  }) : date = date ?? DateTime.now();
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
       sender: json['sender'] ?? 'Unknown',
       message: json['message'] ?? '',
-      dateTime: DateTime.parse(json["date"]),
+      date: DateTime.parse(json["date"]),
     );
   }
 
@@ -21,7 +21,7 @@ class Message {
     return {
       'sender': sender,
       'message': message,
-      'date': dateTime.millisecondsSinceEpoch,
+      'date': date.millisecondsSinceEpoch,
     };
   }
 }

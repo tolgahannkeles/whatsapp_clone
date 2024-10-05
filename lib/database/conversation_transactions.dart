@@ -42,7 +42,8 @@ class ConversationTransactions {
     if (token == null) {
       throw Exception("Token is not available");
     }
-    Uri? uri = Uri.tryParse("$baseMessageUrl/${conversation.id}");
+    Uri? uri = Uri.tryParse(
+        "http://10.0.2.2:8080/api/messages/topic/conversation/${conversation.id}");
     if (uri == null) {
       throw Exception("Invalid URI");
     }

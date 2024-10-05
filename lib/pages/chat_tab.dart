@@ -104,8 +104,7 @@ class _ChatTabState extends State<ChatTab> {
         subtitle: Text(
           conversation.lastMessage?.message ?? "",
         ),
-        trailing:
-            Text(conversation.lastMessage?.dateTime.toIso8601String() ?? ""),
+        trailing: Text(conversation.lastMessage?.date.toIso8601String() ?? ""),
         onTap: () {
           Navigator.of(context).pushNamed(
             ChatScreen.routeName,
